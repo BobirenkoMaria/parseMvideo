@@ -47,13 +47,26 @@ def get_content(html):
 
         # 4 Specifications
         specifics = ''
-
         all_specifics = card.find('mvid-plp-product-feature-list')
         list_name = all_specifics.find_all('span', class_='product-feature-list__name')
         list_value = all_specifics.find_all('span', class_='product-feature-list__value')
 
+        value_id = 0
+        for value in list_value:
+            list_value[value_id] = value.get_text()
+            value_id += 1
+
+        list_value = list(filter(filter_empty, list_value))
+
+        value_id = 0
+        for value in list_value:
+            if len(value) == 1:
+                list_value[value_id:value_id+2] = [' '.join(
+                    list_value[value_id:value_id+2])]
+            value_id += 1
+
         for row in range(0, 5):
-            specifics += f'{list_name[row].get_text()}: {list_value[row].get_text()}\n'
+            specifics += f'{list_name[row].get_text()}: {list_value[row]}\n'
 
         # 5 Hrefs
         more = card.find('div', class_='product-card--list__description')
@@ -118,6 +131,13 @@ def get_html_with_driver(url, page=None):
     driver.quit()
 
     return html
+
+
+def filter_empty(text):
+    if text != '':
+        return True
+    else:
+        return False
 
 
 parse()
